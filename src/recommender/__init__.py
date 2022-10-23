@@ -1,0 +1,1 @@
+from recommender.recommender import SimilarBugReportsRecommendationSystem
