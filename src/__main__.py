@@ -2,17 +2,26 @@ from data_loader import DataLoader;
 from recommender import SimilarBugReportsRecommendationSystem;
 
 def main():
-    dl = DataLoader('data/dataset_curado.csv', max_items=5);
+    print('instanciating data loader');
+    dl = DataLoader('data/dataset_apenas_firefox_e_general.csv', max_items=20);
 
     data = dl.get_data();
 
-    print(data[0].keys())
+    print('instanciating recommender');
+    recommender = SimilarBugReportsRecommendationSystem(corpus=dl.get_data());
 
-    for d in data:
-        print(f',{d["pp_description"]} |||||||||||||||||| {d["description"]}')
-        print('\n\n\n\n')
+    input_data = data[1]
 
-    #recommender = SimilarBugReportsRecommendationSystem(corpus=dl.get_data());
+    results = recommender.get_recommendations(input_data)
+
+    print('INPUT:')
+    print(f'id={input_data["bg_number"]}, product={input_data["product"]}, component={input_data["component"]}, summary={input_data["summary"]}')
+
+    print('-------------------------')
+
+    print('RESULTS:')
+    for result in results:
+        print(f'id={result["item"]["bg_number"]}, product={result["item"]["product"]}, component={result["item"]["component"]}, summary={result["item"]["summary"]}, score={result["score"]}')
 
 if __name__ == '__main__':
     main()

@@ -7,8 +7,5 @@ class BertVectorizer():
         self.vectorizer = SentenceTransformer(BERT)
 
     def transform(self, docs):
-        vectorized_docs = [
-            self.vectorizer.encode(doc) for doc in docs
-        ]
-
+        vectorized_docs = [ self.vectorizer.encode(doc) for doc in docs ]
         return vectorized_docs

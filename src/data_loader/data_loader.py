@@ -83,7 +83,7 @@ class DataLoader():
         tfidf_vectors = []
         bert_embeddings = []
         for i, row in data.iterrows():
-            print(f'doc {i}/{data.shape[0]}')
+            print(f'doc {i+1}/{data.shape[0]}')
 
             print(f'calculating tfidf vector for {row["bg_number"]}...')
             tfidf_vector = tfidf_vectorizer.transform(row['pp_description'])
@@ -91,9 +91,9 @@ class DataLoader():
 
             print(f'calculating embeddings for {row["bg_number"]}...')
             bert_embedding = bert_vectorizer.transform(row['pp_description'])
-            bert_embeddings.append(bert_embedding)
+            bert_embeddings.append(bert_embedding[0])
 
-        data['tfidf_vectors'] = tfidf_vectors
+        data['tfidf_vector'] = tfidf_vectors
         data['bert_embeddings'] = bert_embeddings
 
         return data
