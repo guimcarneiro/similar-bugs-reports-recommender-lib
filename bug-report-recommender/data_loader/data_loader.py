@@ -21,6 +21,7 @@ class DataLoader():
                 )
             )
         )
+        self.data = self.data.to_dict('records')
 
     # load data from file
     def __load(self, data_file_path, data_type='csv', max_items=-1):
@@ -43,6 +44,9 @@ class DataLoader():
         # when description is NaN, redefines it to summary
         self.__apply_nan_threatment(dataframe)
 
+        # concat summary at the beginning of description
+        # self.__apply_summary_and_description_concat(dataframe)
+
         return dataframe[['bg_number', 'product', 'component', 'description', 'summary']]
 
     def __apply_nan_threatment(self, dataframe):
@@ -50,6 +54,12 @@ class DataLoader():
             if(type(row['description']) is not str):
                 print(f'applying nan threatment to bg_number={row["bg_number"]}')
                 dataframe.loc[i, 'description'] = row['summary']        
+
+    def __apply_summary_and_description_concat(self, dataframe):
+        for i, row in dataframe.iterrows():
+            if (not row['description'] == row['summary']):
+                print(f'applying summary and description concat to bg_number={row["bg_number"]}')
+                dataframe.loc[i, 'description'] = row['summary'] + ' ' + row['description'] 
 
     # remove stopwords and punctuation
     def __pre_process(self, data):
@@ -90,7 +100,7 @@ class DataLoader():
             tfidf_vectors.append(tfidf_vector) 
 
             print(f'calculating embeddings for {row["bg_number"]}...')
-            bert_embedding = bert_vectorizer.transform(row['pp_description'])
+            bert_embedding = bert_vectorizer.transform(row['description'])
             bert_embeddings.append(bert_embedding[0])
 
         data['tfidf_vector'] = tfidf_vectors
@@ -99,4 +109,7 @@ class DataLoader():
         return data
 
     def get_data(self):
-        return self.data.to_dict('records')
+        return self.data
+
+    def get_available_ids(self):
+        return self.data['bg_number'].to_list()

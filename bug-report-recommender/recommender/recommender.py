@@ -1,17 +1,11 @@
-from sentence_transformers import util
-
 from utils import calculate_cos_similarity
-
 class SimilarBugReportsRecommendationSystem():
-    def __init__(self, corpus):
+    def __init__(self, data_loader):
         # TODO: separate in config file
         self.categoric_fields = ['product', 'component']
 
         # In-Memory and fill index
-        self.reverse_index = self.__build_reverse_index(corpus)
-
-        # Load configuration
-        pass
+        self.reverse_index = self.__build_reverse_index(data_loader.get_data())
 
     def __get_index_key(self, fields):
         index_key = ''
@@ -78,6 +72,9 @@ class SimilarBugReportsRecommendationSystem():
         candidates_index = self.reverse_index[item_index_key]
         candidates = candidates_index.keys()
 
+        # remove itself
+        candidates = [c for c in candidates if not c == item['bg_number']]
+
         # create ranking with similarity score using tfidf vector
         ranking = []
         for candidate in candidates:
@@ -102,7 +99,7 @@ class SimilarBugReportsRecommendationSystem():
         ranking = sorted(ranking, key=lambda d: d['general_score'], reverse=True)
         
         # keep only top K
-        K = 5
+        K = 10
         top_k_recommendations_from_ranking = ranking[:K]
         
         # build results
