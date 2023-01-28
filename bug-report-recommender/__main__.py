@@ -1,28 +1,59 @@
+import pymongo
 from recommender import SimilarBugReportsRecommendationSystem;
-from data_loader import DataLoader
+from data_loader import DataLoader;
+
+TEST_DATABASE = ''
+TEST_DATABASE_HOST = ''
+PORT = 27017
+
+def get_mongo_conn(MONGO_URL, MONGO_DATABASE):
+    client = pymongo.MongoClient(MONGO_URL)
+    db = client[MONGO_DATABASE]
+    return db
+
+def retrieve_sample_bug_report(db):
+    x = db["bug"].find_one({
+        "sample_set": True
+    }, {
+        "bg_number"     : True,
+        "summary"       : True,
+        "description"   : True,
+        "product"       : True,
+        "component"     : True,
+        "platform"      : True,
+        "type"          : True,
+        "creation_time" : True,
+        "assigned_to"   : True,
+    })
+
+    return x
+
+# Demonstração de utilização de lib com DataLoader
 
 def main():
-    data_path = '../data/dataset_apenas_firefox_e_general.csv'
+    db = get_mongo_conn(MONGO_URL=TEST_DATABASE, MONGO_DATABASE=TEST_DATABASE_HOST)
 
-    print(f'instanciating data loader from {data_path}');
-    data_loader = DataLoader(data_file_path=data_path, data_type='csv', max_items=10)
+    data_loader = DataLoader(database=TEST_DATABASE, host=TEST_DATABASE_HOST, port=PORT)
 
-    print('instanciating recommender');
     recommender = SimilarBugReportsRecommendationSystem(data_loader=data_loader);
 
-    example = data_loader.get_data()[0];
+    example = retrieve_sample_bug_report(db)
 
     print('INPUT:')
-    print(f'id={example["bg_number"]}, product={example["product"]}, component={example["component"]}, summary={example["summary"]}')
+    print(f'id={example["bg_number"]}, summary={example["summary"]}, creation_time={example["creation_time"]}')
 
-    print('-------------------------')
+    print('-'*50)
 
-    results = recommender.get_recommendations(item=example)
+    print('requesting recommendations...')
+    results = recommender.get_recommendations(
+        query=example,
+        K=10
+    )
 
     print('RESULTS:')
-    for result in results:
-        print(f'id={result["item"]["bg_number"]}, product={result["item"]["product"]}, component={result["item"]["component"]}, summary={result["item"]["summary"]}, score={result["score"]}')
-        print('-------')
+    for i, result in enumerate(results):
+        print(f'[{i+1}] id={result["recommendation"]["bg_number"]} - score={result["score"]} : summary={result["recommendation"]["summary"]}, creat_time={result["recommendation"]["creation_time"]}, w_w_resolved={result["recommendation"]["when_changed_to_resolved"]}')
+        print('-'*50)
 
 if __name__ == '__main__':
     main()
