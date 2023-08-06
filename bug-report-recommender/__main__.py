@@ -28,7 +28,7 @@ def retrieve_sample_bug_report(db):
 
     return x
 
-# Demonstração de utilização de lib com DataLoader
+# Demonstrating the use of Bug Reports Recommender lib
 
 def main():
     db = get_mongo_conn(MONGO_URL=TEST_DATABASE, MONGO_DATABASE=TEST_DATABASE_HOST)
